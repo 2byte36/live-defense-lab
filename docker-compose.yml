@@ -1,0 +1,128 @@
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
+
+services:
+  helpdesk:
+    build: .
+    image: live-defense-helpdesk:latest
+    ports:
+      - "${HELPDESK_PORT:-5000}:5000"
+    environment:
+      GROUP_NAME: "Live Defense Target"
+      DATABASE_PATH: "/app/data/helpdesk.db"
+      LOG_DIR: "/logs"
+      SECRET_KEY: "change-this-for-each-workshop"
+    volumes:
+      - helpdesk_data:/app/data
+      - ./workshop-logs:/logs
+    logging: *default-logging
+
+  benign-traffic:
+    build: .
+    image: live-defense-helpdesk:latest
+    command: ["python", "scripts/benign-traffic.py"]
+    environment:
+      TARGET_BASE_URL: "http://helpdesk:5000"
+      BENIGN_USERNAME: "${BENIGN_USERNAME:-alice}"
+      BENIGN_PASSWORD: "${BENIGN_PASSWORD:-password123}"
+      BENIGN_MIN_DELAY: "${BENIGN_MIN_DELAY:-4}"
+      BENIGN_MAX_DELAY: "${BENIGN_MAX_DELAY:-12}"
+      BENIGN_TIMEOUT: "${BENIGN_TIMEOUT:-5}"
+    depends_on:
+      - helpdesk
+    logging: *default-logging
+    mem_limit: 96m
+    cpus: 0.25
+
+  mitigation-helper:
+    build:
+      context: .
+      dockerfile: mitigation-helper/Dockerfile
+    environment:
+      WEB_PORT: "${WEB_PORT:-5000}"
+      MITIGATION_SOCKET: "/run/workshop-mitigation/mitigation.sock"
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./scripts:/opt/live-defense/scripts:ro
+      - mitigation_socket:/run/workshop-mitigation
+    logging: *default-logging
+    mem_limit: 64m
+    cpus: 0.20
+
+  group1-analyst:
+    build: ./analyst
+    hostname: group1-analyst
+    ports:
+      - "${GROUP1_SSH_PORT:-2201}:22"
+    environment:
+      ANALYST_USER: "${ANALYST_USER:-analyst}"
+      ANALYST_PASSWORD: "${ANALYST_PASSWORD:-analyst123}"
+      GROUP_NAME: "Group 1"
+    volumes:
+      - ./workshop-logs:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk
+      - mitigation-helper
+    logging: *default-logging
+
+  group2-analyst:
+    build: ./analyst
+    hostname: group2-analyst
+    ports:
+      - "${GROUP2_SSH_PORT:-2202}:22"
+    environment:
+      ANALYST_USER: "${ANALYST_USER:-analyst}"
+      ANALYST_PASSWORD: "${ANALYST_PASSWORD:-analyst123}"
+      GROUP_NAME: "Group 2"
+    volumes:
+      - ./workshop-logs:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk
+      - mitigation-helper
+    logging: *default-logging
+
+  group3-analyst:
+    build: ./analyst
+    hostname: group3-analyst
+    ports:
+      - "${GROUP3_SSH_PORT:-2203}:22"
+    environment:
+      ANALYST_USER: "${ANALYST_USER:-analyst}"
+      ANALYST_PASSWORD: "${ANALYST_PASSWORD:-analyst123}"
+      GROUP_NAME: "Group 3"
+    volumes:
+      - ./workshop-logs:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk
+      - mitigation-helper
+    logging: *default-logging
+
+  group4-analyst:
+    build: ./analyst
+    hostname: group4-analyst
+    ports:
+      - "${GROUP4_SSH_PORT:-2204}:22"
+    environment:
+      ANALYST_USER: "${ANALYST_USER:-analyst}"
+      ANALYST_PASSWORD: "${ANALYST_PASSWORD:-analyst123}"
+      GROUP_NAME: "Group 4"
+    volumes:
+      - ./workshop-logs:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk
+      - mitigation-helper
+    logging: *default-logging
+
+volumes:
+  helpdesk_data:
+  mitigation_socket:

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Helpdesk Portal{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <div>
+    <p class="section-label mb-1">Operations dashboard</p>
+    <h1 class="h3 mb-0">Support overview</h1>
+  </div>
+  <div class="text-muted small">Group: {{ group_name }}</div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="metric-card">
+      <div class="metric-value">{{ counts.open }}</div>
+      <div class="metric-label">Active tickets</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="metric-card">
+      <div class="metric-value">{{ counts.high }}</div>
+      <div class="metric-label">High priority</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="metric-card">
+      <div class="metric-value">{{ counts.customers }}</div>
+      <div class="metric-label">Customers</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="metric-card">
+      <div class="metric-value">{{ counts.invoices }}</div>
+      <div class="metric-label">Invoice alerts</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="content-panel">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Recent tickets</h2>
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('tickets') }}">View all</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Priority</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ticket in recent_tickets %}
+            <tr>
+              <td><a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}">#{{ ticket.id }}</a></td>
+              <td>{{ ticket.title }}</td>
+              <td>{{ ticket.customer_name }}</td>
+              <td><span class="status-pill">{{ ticket.status }}</span></td>
+              <td>{{ ticket.priority }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="content-panel">
+      <h2 class="h5 mb-3">Audit activity</h2>
+      <div class="activity-list">
+        {% for log in audit_logs %}
+        <div class="activity-item">
+          <div class="small fw-semibold">{{ log.event_type }}</div>
+          <div class="small text-muted">{{ log.username }} · {{ log.created_at }}</div>
+          <div class="small">{{ log.details }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+.env
+cookies.txt
+
+workshop-logs/web/*.log
+workshop-logs/suricata/*.log
+workshop-logs/suricata/*.json
+
+*.swp
+.DS_Store

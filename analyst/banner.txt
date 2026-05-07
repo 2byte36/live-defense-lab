@@ -1,0 +1,3 @@
+Authorized workshop analyst container only.
+Do not attempt to access the VPS host or Docker daemon.
+

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Ticket #{{ ticket.id }} · Helpdesk Portal{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <div>
+    <p class="section-label mb-1">Ticket #{{ ticket.id }}</p>
+    <h1 class="h3 mb-0">{{ ticket.title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('tickets') }}">Back to queue</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="content-panel">
+      <div class="d-flex gap-2 mb-3">
+        <span class="status-pill">{{ ticket.status }}</span>
+        <span class="priority-pill">{{ ticket.priority }}</span>
+      </div>
+      <p class="ticket-description">{{ ticket.description }}</p>
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Created</dt>
+        <dd class="col-sm-9">{{ ticket.created_at }}</dd>
+        <dt class="col-sm-3">Updated</dt>
+        <dd class="col-sm-9">{{ ticket.updated_at }}</dd>
+        <dt class="col-sm-3">Assignee</dt>
+        <dd class="col-sm-9">{{ ticket.assignee_name }} · {{ ticket.assignee_email }}</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="content-panel mb-4">
+      <h2 class="h5 mb-3">Customer</h2>
+      <div class="fw-semibold">{{ ticket.customer_name }}</div>
+      <div class="text-muted small">{{ ticket.customer_company }}</div>
+      <div class="small mt-2">{{ ticket.customer_email }}</div>
+      <div class="small">Tier: {{ ticket.customer_tier }}</div>
+    </div>
+    <div class="content-panel">
+      <h2 class="h5 mb-3">Related invoices</h2>
+      {% for invoice in invoices %}
+      <div class="invoice-row">
+        <div class="fw-semibold">{{ invoice.invoice_number }}</div>
+        <div class="small text-muted">{{ invoice.status }} · {{ "${:,.2f}".format(invoice.amount_cents / 100) }}</div>
+      </div>
+      {% else %}
+      <p class="text-muted small mb-0">No related invoices.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
