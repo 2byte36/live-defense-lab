@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Search · Helpdesk Portal{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <p class="section-label mb-1">Knowledge lookup</p>
+  <h1 class="h3 mb-0">Search tickets</h1>
+</div>
+
+<div class="content-panel mb-4">
+  <form method="get" action="{{ url_for('search') }}" class="row g-2">
+    <div class="col-md-10">
+      <label class="visually-hidden" for="q">Search query</label>
+      <input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Search by customer, title, or issue details">
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+  </form>
+</div>
+
+{% if error %}
+<div class="alert alert-warning">Search backend returned: {{ error }}</div>
+{% endif %}
+
+{% if q %}
+<div class="content-panel">
+  <h2 class="h5 mb-3">Results</h2>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in results %}
+        <tr>
+          <td>{{ row.id }}</td>
+          <td>{{ row.title }}</td>
+          <td>{{ row.customer_name }}</td>
+          <td><span class="status-pill">{{ row.status }}</span></td>
+          <td>{{ row.priority }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-muted">No matching tickets.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

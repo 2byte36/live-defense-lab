@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Profile · Helpdesk Portal{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <p class="section-label mb-1">Account</p>
+  <h1 class="h3 mb-0">Profile</h1>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="content-panel">
+      <h2 class="h5 mb-3">{{ user.full_name }}</h2>
+      <dl class="row mb-0">
+        <dt class="col-sm-4">Username</dt>
+        <dd class="col-sm-8">{{ user.username }}</dd>
+        <dt class="col-sm-4">Email</dt>
+        <dd class="col-sm-8">{{ user.email }}</dd>
+        <dt class="col-sm-4">Role</dt>
+        <dd class="col-sm-8">{{ user.role }}</dd>
+        <dt class="col-sm-4">Department</dt>
+        <dd class="col-sm-8">{{ user.department }}</dd>
+        <dt class="col-sm-4">Last login</dt>
+        <dd class="col-sm-8">{{ user.last_login }}</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="content-panel">
+      <h2 class="h5 mb-3">Recent account activity</h2>
+      <div class="activity-list">
+        {% for log in user_logs %}
+        <div class="activity-item">
+          <div class="small fw-semibold">{{ log.event_type }}</div>
+          <div class="small text-muted">{{ log.created_at }} · {{ log.ip_address }}</div>
+          <div class="small">{{ log.details }}</div>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0">No recent events.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

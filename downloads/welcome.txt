@@ -1,0 +1,3 @@
+Northstar Helpdesk onboarding note
+
+Remember to update ticket status after customer contact and record any invoice-related context on the ticket timeline.

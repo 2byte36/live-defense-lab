@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.db
+.venv/
+venv/
+.git/
+.codex/
+.agents/
+workshop-logs/
+cookies.txt
+attacker-cookies.txt

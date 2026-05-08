@@ -1,0 +1,1 @@
+2026-05-08T05:19:30+00:00 event=auth.login.success user=alice ip=172.18.0.12 ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36" details="User alice signed in"

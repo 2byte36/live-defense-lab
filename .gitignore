@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+cookies.txt
+*.db
+.env
+workshop-logs/*/*.log
+workshop-logs/*/*.json

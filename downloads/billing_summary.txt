@@ -1,0 +1,3 @@
+Billing operations summary
+
+Pending invoices should be reviewed before closing Gold or Platinum tier customer tickets.

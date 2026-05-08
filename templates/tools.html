@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Tools · Helpdesk Portal{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <p class="section-label mb-1">Internal utilities</p>
+  <h1 class="h3 mb-0">Tools</h1>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="content-panel">
+      <h2 class="h5 mb-3">Base64 encoder</h2>
+      <form method="post" action="{{ url_for('base64_tool') }}" class="vstack gap-3">
+        <div>
+          <label class="form-label" for="text">Text to encode</label>
+          <textarea class="form-control" id="text" name="text" rows="5">{{ encoded_input }}</textarea>
+        </div>
+        <button class="btn btn-primary align-self-start" type="submit">Encode</button>
+      </form>
+      {% if command_output is not none %}
+      <div class="mt-4">
+        <div class="small text-muted mb-1">Result</div>
+        <pre class="tool-output">{{ command_output }}</pre>
+        {% if command_error %}
+        <div class="small text-muted mb-1">Diagnostic output</div>
+        <pre class="tool-output">{{ command_error }}</pre>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="content-panel">
+      <h2 class="h5 mb-3">Shared downloads</h2>
+      <p class="text-muted small">Common notes for support agents and finance operations.</p>
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action" href="{{ url_for('download', file='welcome.txt') }}">Agent onboarding note</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('download', file='billing_summary.txt') }}">Billing summary note</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

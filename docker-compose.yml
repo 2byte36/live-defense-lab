@@ -1,0 +1,213 @@
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
+
+x-helpdesk-common: &helpdesk-common
+  build: .
+  image: live-defense-helpdesk:latest
+  environment: &helpdesk-env
+    DATABASE_PATH: "/app/data/helpdesk.db"
+    LOG_DIR: "/logs"
+    SECRET_KEY: "change-this-for-each-workshop"
+  logging: *default-logging
+
+x-benign-common: &benign-common
+  build: .
+  image: live-defense-helpdesk:latest
+  command: ["python", "scripts/benign-traffic.py"]
+  environment: &benign-env
+    BENIGN_USERNAME: "${BENIGN_USERNAME:-alice}"
+    BENIGN_PASSWORD: "${BENIGN_PASSWORD:-password123}"
+    BENIGN_MIN_DELAY: "${BENIGN_MIN_DELAY:-4}"
+    BENIGN_MAX_DELAY: "${BENIGN_MAX_DELAY:-12}"
+    BENIGN_TIMEOUT: "${BENIGN_TIMEOUT:-5}"
+  logging: *default-logging
+  mem_limit: 96m
+  cpus: 0.25
+
+x-analyst-common: &analyst-common
+  build: ./analyst
+  environment: &analyst-env
+    ANALYST_USER: "${ANALYST_USER:-analyst}"
+    ANALYST_PASSWORD: "${ANALYST_PASSWORD:-analyst123}"
+  volumes:
+    - mitigation_socket:/run/workshop-mitigation
+  depends_on:
+    - mitigation-helper
+  logging: *default-logging
+
+services:
+  helpdesk-group1:
+    <<: *helpdesk-common
+    ports:
+      - "${GROUP1_WEB_PORT:-5001}:5000"
+    environment:
+      <<: *helpdesk-env
+      GROUP_NAME: "Group 1 Target"
+    volumes:
+      - helpdesk_group1_data:/app/data
+      - ./workshop-logs/group1:/logs
+
+  helpdesk-group2:
+    <<: *helpdesk-common
+    ports:
+      - "${GROUP2_WEB_PORT:-5002}:5000"
+    environment:
+      <<: *helpdesk-env
+      GROUP_NAME: "Group 2 Target"
+    volumes:
+      - helpdesk_group2_data:/app/data
+      - ./workshop-logs/group2:/logs
+
+  helpdesk-group3:
+    <<: *helpdesk-common
+    ports:
+      - "${GROUP3_WEB_PORT:-5003}:5000"
+    environment:
+      <<: *helpdesk-env
+      GROUP_NAME: "Group 3 Target"
+    volumes:
+      - helpdesk_group3_data:/app/data
+      - ./workshop-logs/group3:/logs
+
+  helpdesk-group4:
+    <<: *helpdesk-common
+    ports:
+      - "${GROUP4_WEB_PORT:-5004}:5000"
+    environment:
+      <<: *helpdesk-env
+      GROUP_NAME: "Group 4 Target"
+    volumes:
+      - helpdesk_group4_data:/app/data
+      - ./workshop-logs/group4:/logs
+
+  benign-traffic-group1:
+    <<: *benign-common
+    environment:
+      <<: *benign-env
+      TARGET_BASE_URL: "http://helpdesk-group1:5000"
+    depends_on:
+      - helpdesk-group1
+
+  benign-traffic-group2:
+    <<: *benign-common
+    environment:
+      <<: *benign-env
+      TARGET_BASE_URL: "http://helpdesk-group2:5000"
+    depends_on:
+      - helpdesk-group2
+
+  benign-traffic-group3:
+    <<: *benign-common
+    environment:
+      <<: *benign-env
+      TARGET_BASE_URL: "http://helpdesk-group3:5000"
+    depends_on:
+      - helpdesk-group3
+
+  benign-traffic-group4:
+    <<: *benign-common
+    environment:
+      <<: *benign-env
+      TARGET_BASE_URL: "http://helpdesk-group4:5000"
+    depends_on:
+      - helpdesk-group4
+
+  mitigation-helper:
+    build:
+      context: .
+      dockerfile: mitigation-helper/Dockerfile
+    environment:
+      ALLOWED_GROUP_PORTS: "1:${GROUP1_WEB_PORT:-5001} 2:${GROUP2_WEB_PORT:-5002} 3:${GROUP3_WEB_PORT:-5003} 4:${GROUP4_WEB_PORT:-5004}"
+      MITIGATION_SOCKET: "/run/workshop-mitigation/mitigation.sock"
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./scripts:/opt/live-defense/scripts:ro
+      - mitigation_socket:/run/workshop-mitigation
+    logging: *default-logging
+    mem_limit: 64m
+    cpus: 0.20
+
+  group1-analyst:
+    <<: *analyst-common
+    hostname: group1-analyst
+    ports:
+      - "${GROUP1_SSH_PORT:-2201}:22"
+    environment:
+      <<: *analyst-env
+      GROUP_NAME: "Group 1"
+      GROUP_ID: "1"
+      WEB_PORT: "${GROUP1_WEB_PORT:-5001}"
+      TARGET_SERVICE: "helpdesk-group1"
+    volumes:
+      - ./workshop-logs/group1:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk-group1
+      - mitigation-helper
+
+  group2-analyst:
+    <<: *analyst-common
+    hostname: group2-analyst
+    ports:
+      - "${GROUP2_SSH_PORT:-2202}:22"
+    environment:
+      <<: *analyst-env
+      GROUP_NAME: "Group 2"
+      GROUP_ID: "2"
+      WEB_PORT: "${GROUP2_WEB_PORT:-5002}"
+      TARGET_SERVICE: "helpdesk-group2"
+    volumes:
+      - ./workshop-logs/group2:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk-group2
+      - mitigation-helper
+
+  group3-analyst:
+    <<: *analyst-common
+    hostname: group3-analyst
+    ports:
+      - "${GROUP3_SSH_PORT:-2203}:22"
+    environment:
+      <<: *analyst-env
+      GROUP_NAME: "Group 3"
+      GROUP_ID: "3"
+      WEB_PORT: "${GROUP3_WEB_PORT:-5003}"
+      TARGET_SERVICE: "helpdesk-group3"
+    volumes:
+      - ./workshop-logs/group3:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk-group3
+      - mitigation-helper
+
+  group4-analyst:
+    <<: *analyst-common
+    hostname: group4-analyst
+    ports:
+      - "${GROUP4_SSH_PORT:-2204}:22"
+    environment:
+      <<: *analyst-env
+      GROUP_NAME: "Group 4"
+      GROUP_ID: "4"
+      WEB_PORT: "${GROUP4_WEB_PORT:-5004}"
+      TARGET_SERVICE: "helpdesk-group4"
+    volumes:
+      - ./workshop-logs/group4:/logs:ro
+      - mitigation_socket:/run/workshop-mitigation
+    depends_on:
+      - helpdesk-group4
+      - mitigation-helper
+
+volumes:
+  helpdesk_group1_data:
+  helpdesk_group2_data:
+  helpdesk_group3_data:
+  helpdesk_group4_data:
+  mitigation_socket:
