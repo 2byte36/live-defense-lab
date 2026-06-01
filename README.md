@@ -1,4 +1,4 @@
-# Lightweight Vulnerable Helpdesk
+# Lightweight Live Defense Lab
 
 Small Flask and SQLite helpdesk portal for controlled cybersecurity defense workshops. It intentionally includes SQL injection, command injection, and path traversal examples so participants can practice live attack observation, log analysis, and detection engineering.
 
